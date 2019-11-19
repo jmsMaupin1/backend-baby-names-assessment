@@ -37,7 +37,28 @@ Suggested milestones for incremental development:
  - Build the [year, 'name rank', ... ] list and print it
  - Fix main() to use the extract_names list
 """
+def get_match(pattern, line):
+    match = re.findall(pattern, line)
+    return match[0] if len(match) else None
 
+def write_summary(filename, output):
+    with open(filename, "w") as f:
+        f.write(output)
+
+def read_file(filename):
+    """returns text from filename"""
+    babies_pattern = r'<td>(\d+)</td><td>(\w+)</td><td>(\w+)</td>'
+
+    with open(filename, "r") as f:
+        return [get_match(babies_pattern, line) for line in f if get_match(babies_pattern, line)]
+
+def build_name_dict(names):
+    name_dict = {}
+    for count, name1, name2 in names:
+        name_dict[name1] = count if name1 not in name_dict else min(name_dict[name1], count)
+        name_dict[name2] = count if name2 not in name_dict else min(name_dict[name2], count)
+
+    return name_dict
 
 def extract_names(filename):
     """
@@ -45,8 +66,12 @@ def extract_names(filename):
     with the year string followed by the name-rank strings in alphabetical order.
     ['2006', 'Aaliyah 91', Aaron 57', 'Abagail 895', ' ...]
     """
-    names = []
-    # +++your code here+++
+    year_pattern = r'baby(.*).html'
+    year = re.match(year_pattern, filename).group(1)
+    name_dict = build_name_dict(read_file(filename))
+    names = list(map(lambda x: "%s %s" % (x[0], x[1]), zip(name_dict.keys(), name_dict.values())))
+    names = sorted(names)
+    names.insert(0, year)
     return names
 
 
@@ -72,17 +97,15 @@ def main(args):
         sys.exit(1)
 
     file_list = ns.files
-
     # option flag
     create_summary = ns.summaryfile
 
-    # For each filename, call `extract_names` with that single file.
-    # Format the resulting list a vertical list (separated by newline \n)
-    # Use the create_summary flag to decide whether to print the list,
-    # or to write the list to a summary file e.g. `baby1990.html.summary`
-
-    # +++your code here+++
-
+    for f in file_list:
+        names = extract_names(f)
+        if create_summary:
+            write_summary("baby%s.html.summary" % names[0], "\n".join(names))
+        else:
+            print("\n".join(names) + "\n")
 
 if __name__ == '__main__':
     main(sys.argv[1:])
