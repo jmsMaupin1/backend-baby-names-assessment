@@ -55,8 +55,8 @@ def read_file(filename):
 def build_name_dict(names):
     name_dict = {}
     for count, name1, name2 in names:
-        name_dict[name1] = count if name1 not in name_dict else min(name_dict[name1], count)
-        name_dict[name2] = count if name2 not in name_dict else min(name_dict[name2], count)
+        name_dict[name1] = count if name1 not in name_dict else name_dict[name1]
+        name_dict[name2] = count if name2 not in name_dict else name_dict[name2]
 
     return name_dict
 
@@ -105,7 +105,7 @@ def main(args):
         if create_summary:
             write_summary("baby%s.html.summary" % names[0], "\n".join(names))
         else:
-            print("\n".join(names) + "\n")
+            print("\n".join(names))
 
 if __name__ == '__main__':
     main(sys.argv[1:])
